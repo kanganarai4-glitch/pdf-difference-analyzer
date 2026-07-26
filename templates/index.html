@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Difference Analyzer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Difference Analyzer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>PDF Difference Analyzer</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+
+        <div class="input-group">
+
+            <label>Select Old Product Folder</label>
+
+            <input
+                type="file"
+                id="oldFolder"
+                webkitdirectory
+                directory
+                multiple
+                accept=".pdf">
+
+        </div>
+
+        <div class="input-group">
+
+            <label>Select New Product Folder</label>
+
+            <input
+                type="file"
+                id="newFolder"
+                webkitdirectory
+                directory
+                multiple
+                accept=".pdf">
+
+        </div>
+
+        <button type="submit">
+            Compare PDFs
+        </button>
+
+    </form>
+
+    <div id="status">
+
+        Waiting for folders...
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
