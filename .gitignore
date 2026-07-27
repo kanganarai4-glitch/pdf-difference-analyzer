@@ -9,7 +9,10 @@ __pycache__/
 .vscode/
 
 # Uploaded files
-uploads/
+uploads/*
+!uploads/old/
+!uploads/new/
+!uploads/**/.gitkeep
 
 # Generated reports
 reports/
