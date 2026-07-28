@@ -1,76 +1,102 @@
 """
-pdf_reader.py
+pdf_reader.py  —  Milestone 5
 
-Reads PDF files and extracts text.
+Responsible for:
+    Reading a PDF file and extracting all text from every page.
+
+How it works
+─────────────────────────────────────────────────────────────────
+  Uses PyMuPDF (fitz) to open each page and call get_text().
+  Returns a clean list of non-empty lines.
+
+  Example:
+      reader = PDFReader()
+      lines  = reader.extract_text("uploads/old/Login.pdf")
+      # → ["Login", "Username", "Password", "Forgot Password"]
+
+Why line-by-line?
+─────────────────────────────────────────────────────────────────
+  The comparison engine (comparator.py) works by comparing
+  individual lines of text. Breaking the PDF into lines here
+  makes that step simpler.
 """
 
-import fitz
+import fitz  # PyMuPDF — pip install pymupdf
 from pathlib import Path
 
 
+# ── PDFReader ─────────────────────────────────────────────────────────────
+
 class PDFReader:
     """
-    Reads PDF files and extracts text page by page.
+    Reads PDF files and extracts text as a flat list of lines.
     """
-
-    def __init__(self):
-        pass
 
     def extract_text(self, pdf_path):
         """
-        Extract text from a PDF.
+        Extract all text lines from a PDF.
 
         Parameters:
-            pdf_path (str or Path)
+            pdf_path (str | Path): Path to the PDF file.
 
         Returns:
-            list[str]
+            list[str]: Non-empty, stripped text lines.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+
+        Example:
+            ["Login", "Username", "Password", "Forgot Password"]
         """
 
         pdf_path = Path(pdf_path)
 
         if not pdf_path.exists():
-            raise FileNotFoundError(f"File not found: {pdf_path}")
+            raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
         extracted_lines = []
 
         try:
             document = fitz.open(pdf_path)
 
-            for page_number, page in enumerate(document, start=1):
+            for page in document:
+                # get_text() returns the full page text as a string.
+                # We split on newlines and strip whitespace from each line.
+                raw_text = page.get_text()
 
-                text = page.get_text()
-
-                for line in text.splitlines():
-
-                    cleaned_line = line.strip()
-
-                    if cleaned_line:
-                        extracted_lines.append(cleaned_line)
+                for line in raw_text.splitlines():
+                    cleaned = line.strip()
+                    if cleaned:  # skip blank lines
+                        extracted_lines.append(cleaned)
 
             document.close()
 
-            return extracted_lines
-
         except Exception as error:
-            print(f"Error reading PDF: {error}")
+            print(f"[PDFReader] Error reading '{pdf_path}': {error}")
             return []
 
+        return extracted_lines
+
+
+# ── Quick Test ────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
 
     reader = PDFReader()
 
+    # Change this path to any PDF in your uploads folder to test.
     sample_pdf = "uploads/old/sample.pdf"
 
     try:
         lines = reader.extract_text(sample_pdf)
 
-        print("\nExtracted Text")
-        print("-" * 40)
+        print(f"\n📄 Extracted {len(lines)} lines from '{sample_pdf}'")
+        print("─" * 40)
 
-        for line in lines:
-            print(line)
+        for i, line in enumerate(lines, start=1):
+            print(f"  {i:>3}. {line}")
 
-    except Exception as e:
-        print(e)
+        print()
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}")

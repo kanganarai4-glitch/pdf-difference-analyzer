@@ -4,72 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Difference Analyzer</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Difference Analyzer</title>
-
+    <meta name="description" content="Compare two folders of PDF files and generate a detailed difference report in Excel and CSV format.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="container">
+    <div class="page-wrapper">
 
-    <h1>PDF Difference Analyzer</h1>
-<form id="uploadForm" enctype="multipart/form-data">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-icon">📄</div>
+            <h1>PDF Difference Analyzer</h1>
+            <p class="subtitle">Upload two folders of PDFs to compare and generate a detailed difference report.</p>
+        </header>
 
-        <div class="input-group">
+        <!-- Upload Card -->
+        <div class="card">
+            <form id="uploadForm" enctype="multipart/form-data">
 
-            <label>Select Old Product Folder</label>
+                <!-- Old Folder -->
+                <div class="input-group">
+                    <label for="oldFolder">
+                        <span class="label-badge old">OLD</span>
+                        Select Old Product Folder
+                    </label>
+                    <div class="file-drop-zone" id="oldDropZone">
+                        <div class="drop-icon">📁</div>
+                        <p class="drop-text">Click to select folder or drag & drop</p>
+                        <p class="drop-subtext" id="oldFolderInfo">No folder selected</p>
+                        <input
+                            type="file"
+                            id="oldFolder"
+                            name="old_files"
+                            webkitdirectory
+                            directory
+                            multiple>
+                    </div>
+                </div>
 
-            <input
-                type="file"
-                id="oldFolder"
-                webkitdirectory
-                directory
-                multiple
-                accept=".pdf">
+                <!-- New Folder -->
+                <div class="input-group">
+                    <label for="newFolder">
+                        <span class="label-badge new">NEW</span>
+                        Select New Product Folder
+                    </label>
+                    <div class="file-drop-zone" id="newDropZone">
+                        <div class="drop-icon">📁</div>
+                        <p class="drop-text">Click to select folder or drag & drop</p>
+                        <p class="drop-subtext" id="newFolderInfo">No folder selected</p>
+                        <input
+                            type="file"
+                            id="newFolder"
+                            name="new_files"
+                            webkitdirectory
+                            directory
+                            multiple>
+                    </div>
+                </div>
+
+                <button type="submit" id="compareBtn">
+                    <span id="btnText">⚡ Compare PDFs</span>
+                    <span id="btnSpinner" class="spinner hidden"></span>
+                </button>
+
+            </form>
+
+            <!-- Status / Result Area -->
+            <div id="statusArea" class="status-area hidden">
+                <div id="statusMessage" class="status-message"></div>
+                <div id="downloadLinks" class="download-links hidden">
+                    <a id="downloadXlsx" href="/download/xlsx" class="download-btn xlsx-btn">
+                        ⬇ Download Excel Report
+                    </a>
+                    <a id="downloadCsv" href="/download/csv" class="download-btn csv-btn">
+                        ⬇ Download CSV Report
+                    </a>
+                </div>
+            </div>
 
         </div>
 
-        <div class="input-group">
-
-            <label>Select New Product Folder</label>
-
-            <input
-                type="file"
-                id="newFolder"
-                webkitdirectory
-                directory
-                multiple
-                accept=".pdf">
-
+        <!-- How It Works -->
+        <div class="info-strip">
+            <div class="info-step">
+                <div class="info-num">1</div>
+                <div>Upload old &amp; new PDF folders</div>
+            </div>
+            <div class="info-arrow">→</div>
+            <div class="info-step">
+                <div class="info-num">2</div>
+                <div>Click Compare PDFs</div>
+            </div>
+            <div class="info-arrow">→</div>
+            <div class="info-step">
+                <div class="info-num">3</div>
+                <div>Download your report</div>
+            </div>
         </div>
-
-        <button type="submit">
-            Compare PDFs
-        </button>
-
-    </form>
-
-    <div id="status">
-
-        Waiting for folders...
 
     </div>
-
-</div>
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
-
-</body>
-</html>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 
