@@ -6,18 +6,19 @@
  * Will be extended to call /compare in Milestone 8.
  */
 
-const form       = document.getElementById("uploadForm");
-const oldInput   = document.getElementById("oldFolder");
-const newInput   = document.getElementById("newFolder");
-const oldInfo    = document.getElementById("oldFolderInfo");
-const newInfo    = document.getElementById("newFolderInfo");
-const oldZone    = document.getElementById("oldDropZone");
-const newZone    = document.getElementById("newDropZone");
-const compareBtn = document.getElementById("compareBtn");
-const btnText    = document.getElementById("btnText");
-const btnSpinner = document.getElementById("btnSpinner");
-const statusArea = document.getElementById("statusArea");
-const statusMsg  = document.getElementById("statusMessage");
+const form          = document.getElementById("uploadForm");
+const oldInput      = document.getElementById("oldFolder");
+const newInput      = document.getElementById("newFolder");
+const oldInfo       = document.getElementById("oldFolderInfo");
+const newInfo       = document.getElementById("newFolderInfo");
+const oldZone       = document.getElementById("oldDropZone");
+const newZone       = document.getElementById("newDropZone");
+const compareBtn    = document.getElementById("compareBtn");
+const btnText       = document.getElementById("btnText");
+const btnSpinner    = document.getElementById("btnSpinner");
+const statusArea    = document.getElementById("statusArea");
+const statusMsg     = document.getElementById("statusMessage");
+const downloadLinks = document.getElementById("downloadLinks");
 
 // ── Folder selection feedback ──────────────────────────────────────────────
 
@@ -77,20 +78,40 @@ form.addEventListener("submit", async function (event) {
 
     // Show loading state
     setLoading(true);
+    downloadLinks.classList.add("hidden");
     showStatus("Uploading folders...", "loading");
 
     try {
-        const response = await fetch("/upload", {
+        const uploadResponse = await fetch("/upload", {
             method: "POST",
             body: formData
         });
 
-        const result = await response.json();
+        const uploadResult = await uploadResponse.json();
 
-        if (response.ok) {
-            showStatus("✅ " + result.message, "success");
+        if (!uploadResponse.ok) {
+            showStatus("❌ Upload failed: " + (uploadResult.error || "Unknown error"), "error");
+            setLoading(false);
+            return;
+        }
+
+        showStatus("Comparing PDF contents and generating reports...", "loading");
+
+        const compareResponse = await fetch("/compare", {
+            method: "POST"
+        });
+
+        const compareResult = await compareResponse.json();
+
+        if (compareResponse.ok) {
+            const sum = compareResult.summary;
+            const message = `✅ Comparison completed!\n` +
+                            `Added: ${sum.added} | Deleted: ${sum.deleted} | ` +
+                            `Modified: ${sum.modified} | Identical: ${sum.identical}`;
+            showStatus(message, "success");
+            downloadLinks.classList.remove("hidden");
         } else {
-            showStatus("❌ Upload failed: " + (result.error || "Unknown error"), "error");
+            showStatus("❌ Comparison failed: " + (compareResult.error || "Unknown error"), "error");
         }
 
     } catch (err) {

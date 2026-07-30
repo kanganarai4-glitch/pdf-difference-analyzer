@@ -251,6 +251,7 @@ button[type="submit"]:disabled {
     font-size: 0.9rem;
     color: var(--text-secondary);
     font-weight: 500;
+    white-space: pre-line;
 }
 
 .status-message.success { color: var(--accent-new); }

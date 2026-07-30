@@ -77,6 +77,59 @@ class PDFReader:
 
         return extracted_lines
 
+    def extract_attributes(self, pdf_path):
+        """
+        Extract structured order/product attributes from a PDF file.
+        """
+        lines = self.extract_text(pdf_path)
+        
+        data = {
+            "Order_ID": "",
+            "Order_Date": "",
+            "Customer_Name": "",
+            "City": "",
+            "State": "",
+            "Region": "",
+            "Country": "",
+            "Category": "",
+            "Sub_Category": "",
+            "Product_Name": ""
+        }
+        
+        import re
+        patterns = {
+            "Order_ID": r"(?:order[-_\s]?id|order\s*(?:no|#))[:\-\s]+(.*)",
+            "Order_Date": r"(?:order[-_\s]?date|date)[:\-\s]+(.*)",
+            "Customer_Name": r"(?:customer[-_\s]?name|customer)[:\-\s]+(.*)",
+            "City": r"(?:city)[:\-\s]+(.*)",
+            "State": r"(?:state)[:\-\s]+(.*)",
+            "Region": r"(?:region)[:\-\s]+(.*)",
+            "Country": r"(?:country)[:\-\s]+(.*)",
+            "Category": r"(?:category)[:\-\s]+(.*)",
+            "Sub_Category": r"(?:sub[-_\s]?category)[:\-\s]+(.*)",
+            "Product_Name": r"(?:product[-_\s]?name|product)[:\-\s]+(.*)"
+        }
+        
+        matched_keys = set()
+        for line in lines:
+            for key, pattern in patterns.items():
+                if key in matched_keys:
+                    continue
+                match = re.search(pattern, line, re.IGNORECASE)
+                if match:
+                    data[key] = match.group(1).strip()
+                    matched_keys.add(key)
+                    
+        # Positional fallback if no label colons were found and we have enough lines
+        has_colons = any(":" in line or "-" in line for line in lines)
+        if not has_colons and len(lines) >= 10:
+            keys_list = list(data.keys())
+            for idx, key in enumerate(keys_list):
+                if idx < len(lines):
+                    data[key] = lines[idx].strip()
+                    
+        return data
+
 
 # ── Quick Test ────────────────────────────────────────────────────────────
 
