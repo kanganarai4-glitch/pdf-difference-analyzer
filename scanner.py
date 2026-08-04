@@ -1,22 +1,4 @@
-"""
-scanner.py  —  Milestone 4
 
-Responsible for:
-    1. Scanning a folder recursively for PDF files.
-    2. Comparing two folders to find Added, Deleted, and Common PDFs.
-
-How it works
-─────────────────────────────────────────────────────────────────
-  scan_folder("uploads/old")  →  {"Login.pdf": Path(...), ...}
-
-  compare_folders("uploads/old", "uploads/new")  →  {
-      "old_files": {...},
-      "new_files": {...},
-      "added":    ["Payment.pdf"],
-      "deleted":  ["OldReport.pdf"],
-      "common":   ["Login.pdf", "Dashboard.pdf"],
-  }
-"""
 
 from pathlib import Path
 
@@ -24,23 +6,6 @@ from pathlib import Path
 # ── Public API ────────────────────────────────────────────────────────────
 
 def scan_folder(folder_path):
-    """
-    Recursively scan a folder for PDF files.
-
-    Parameters:
-        folder_path (str | Path): Root folder to scan.
-
-    Returns:
-        dict[str, Path]:
-            Keys   — relative path string, e.g. "Reports/Sales.pdf"
-            Values — absolute Path object to the file
-
-    Example:
-        {
-            "Login.pdf":         Path("uploads/old/Login.pdf"),
-            "Reports/Sales.pdf": Path("uploads/old/Reports/Sales.pdf"),
-        }
-    """
 
     folder = Path(folder_path)
 
@@ -50,8 +15,6 @@ def scan_folder(folder_path):
     files = {}
 
     for pdf_file in folder.rglob("*.pdf"):
-        # Make the key relative to the root folder so both
-        # old and new folders share the same key namespace.
         relative_path = pdf_file.relative_to(folder)
         files[str(relative_path)] = pdf_file
 
@@ -59,21 +22,7 @@ def scan_folder(folder_path):
 
 
 def compare_folders(old_folder, new_folder):
-    """
-    Compare two folders and classify every PDF.
-
-    Parameters:
-        old_folder (str | Path): The original (old) folder.
-        new_folder (str | Path): The updated (new) folder.
-
-    Returns:
-        dict with:
-            old_files  — dict from scan_folder(old_folder)
-            new_files  — dict from scan_folder(new_folder)
-            added      — list of PDFs only in new folder
-            deleted    — list of PDFs only in old folder
-            common     — list of PDFs present in both folders
-    """
+   
 
     old_files = scan_folder(old_folder)
     new_files = scan_folder(new_folder)

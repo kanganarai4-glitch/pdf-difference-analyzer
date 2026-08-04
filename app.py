@@ -11,19 +11,17 @@ Milestones covered:
     Milestone 8 — Integration    (compare endpoint & file downloads)
 """
 
+import os
 from flask import Flask, render_template, request, jsonify, send_file
 from pathlib import Path
 from report_generator import ReportGenerator
 
 app = Flask(__name__)
-
-# ── Folder paths ──────────────────────────────────────────────────────────
 OLD_UPLOAD = Path("uploads/old")
 NEW_UPLOAD = Path("uploads/new")
 REPORTS_DIR = Path("reports")
 
 
-# ── Routes ────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def home():
@@ -48,8 +46,6 @@ def upload():
     """
 
     try:
-        # Clear old uploads before saving new ones
-        # Skip files that are locked/open by another process (Windows)
         for folder in [OLD_UPLOAD, NEW_UPLOAD]:
             if folder.exists():
                 for file in folder.rglob("*"):
@@ -62,7 +58,6 @@ def upload():
         OLD_UPLOAD.mkdir(parents=True, exist_ok=True)
         NEW_UPLOAD.mkdir(parents=True, exist_ok=True)
 
-        # Save old folder PDFs
         old_files = request.files.getlist("old_files")
         for file in old_files:
             if file.filename.lower().endswith(".pdf"):
@@ -70,7 +65,6 @@ def upload():
                 save_path.parent.mkdir(parents=True, exist_ok=True)
                 file.save(save_path)
 
-        # Save new folder PDFs
         new_files = request.files.getlist("new_files")
         for file in new_files:
             if file.filename.lower().endswith(".pdf"):
@@ -107,11 +101,12 @@ def compare():
         generator.generate_xlsx_report(analysis, xlsx_path)
         generator.generate_csv_report(analysis, csv_path)
 
+        results = analysis.get("results", [])
         summary = {
-            "added": len(analysis["added_files"]),
-            "deleted": len(analysis["deleted_files"]),
-            "modified": len(analysis["modified_files"]),
-            "identical": len(analysis["identical_files"]),
+            "added": sum(1 for r in results if r["Comparison_Status"] == "ADDED"),
+            "deleted": sum(1 for r in results if r["Comparison_Status"] == "DELETED"),
+            "modified": sum(1 for r in results if r["Comparison_Status"] == "MODIFIED"),
+            "identical": sum(1 for r in results if r["Comparison_Status"] == "IDENTICAL"),
         }
 
         return jsonify({
@@ -148,4 +143,6 @@ def download_csv():
 # ── Entry Point ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    host = os.getenv("FLASK_HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "5000"))
+    app.run(host=host, port=port, debug=False)

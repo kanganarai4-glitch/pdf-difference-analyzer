@@ -1,25 +1,4 @@
-"""
-pdf_reader.py  —  Milestone 5
 
-Responsible for:
-    Reading a PDF file and extracting all text from every page.
-
-How it works
-─────────────────────────────────────────────────────────────────
-  Uses PyMuPDF (fitz) to open each page and call get_text().
-  Returns a clean list of non-empty lines.
-
-  Example:
-      reader = PDFReader()
-      lines  = reader.extract_text("uploads/old/Login.pdf")
-      # → ["Login", "Username", "Password", "Forgot Password"]
-
-Why line-by-line?
-─────────────────────────────────────────────────────────────────
-  The comparison engine (comparator.py) works by comparing
-  individual lines of text. Breaking the PDF into lines here
-  makes that step simpler.
-"""
 
 import fitz  # PyMuPDF — pip install pymupdf
 from pathlib import Path
@@ -28,26 +7,10 @@ from pathlib import Path
 # ── PDFReader ─────────────────────────────────────────────────────────────
 
 class PDFReader:
-    """
-    Reads PDF files and extracts text as a flat list of lines.
-    """
+   
 
     def extract_text(self, pdf_path):
-        """
-        Extract all text lines from a PDF.
-
-        Parameters:
-            pdf_path (str | Path): Path to the PDF file.
-
-        Returns:
-            list[str]: Non-empty, stripped text lines.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
-
-        Example:
-            ["Login", "Username", "Password", "Forgot Password"]
-        """
+      
 
         pdf_path = Path(pdf_path)
 
@@ -120,7 +83,6 @@ class PDFReader:
                     data[key] = match.group(1).strip()
                     matched_keys.add(key)
                     
-        # Positional fallback if no label colons were found and we have enough lines
         has_colons = any(":" in line or "-" in line for line in lines)
         if not has_colons and len(lines) >= 10:
             keys_list = list(data.keys())
@@ -131,13 +93,10 @@ class PDFReader:
         return data
 
 
-# ── Quick Test ────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
 
     reader = PDFReader()
 
-    # Change this path to any PDF in your uploads folder to test.
     sample_pdf = "uploads/old/sample.pdf"
 
     try:
