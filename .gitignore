@@ -1,24 +1,21 @@
-# Virtual Environment
 venv/
 
-# Python cache
 __pycache__/
 *.pyc
 
-# VS Code settings
 .vscode/
 
-# Uploaded files
 uploads/*
 !uploads/old/
 !uploads/new/
+uploads/old/**
+uploads/new/**
+!uploads/old/.gitkeep
+!uploads/new/.gitkeep
 !uploads/**/.gitkeep
 
-# Generated reports
 reports/
 
-# macOS
 .DS_Store
 
-# Windows
 Thumbs.db

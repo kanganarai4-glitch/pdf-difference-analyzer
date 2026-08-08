@@ -1,10 +1,4 @@
-/**
- * script.js
- *
- * Handles folder selection display and form submission.
- * Currently wired to /upload (Milestone 3).
- * Will be extended to call /compare in Milestone 8.
- */
+
 
 const form          = document.getElementById("uploadForm");
 const oldInput      = document.getElementById("oldFolder");
@@ -20,7 +14,7 @@ const statusArea    = document.getElementById("statusArea");
 const statusMsg     = document.getElementById("statusMessage");
 const downloadLinks = document.getElementById("downloadLinks");
 
-// ── Folder selection feedback ──────────────────────────────────────────────
+
 
 oldInput.addEventListener("change", () => {
     const count = filterPDFs(oldInput.files);
@@ -38,14 +32,14 @@ newInput.addEventListener("change", () => {
     newZone.classList.toggle("active", count > 0);
 });
 
-/** Return how many files in a FileList are PDFs */
+
 function filterPDFs(fileList) {
     return Array.from(fileList).filter(f =>
         f.name.toLowerCase().endsWith(".pdf")
     ).length;
 }
 
-// ── Form submit ────────────────────────────────────────────────────────────
+
 
 form.addEventListener("submit", async function (event) {
 
@@ -54,7 +48,7 @@ form.addEventListener("submit", async function (event) {
     const oldFiles = oldInput.files;
     const newFiles = newInput.files;
 
-    // Validation
+    
     if (oldFiles.length === 0 || newFiles.length === 0) {
         showStatus("Please select both folders before comparing.", "error");
         return;
@@ -65,7 +59,7 @@ form.addEventListener("submit", async function (event) {
         return;
     }
 
-    // Build FormData
+    
     const formData = new FormData();
 
     for (const file of oldFiles) {
@@ -76,7 +70,7 @@ form.addEventListener("submit", async function (event) {
         formData.append("new_files", file, file.webkitRelativePath || file.name);
     }
 
-    // Show loading state
+    
     setLoading(true);
     downloadLinks.classList.add("hidden");
     showStatus("Uploading folders...", "loading");
@@ -122,7 +116,7 @@ form.addEventListener("submit", async function (event) {
 
 });
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+
 
 function showStatus(message, type = "") {
     statusArea.classList.remove("hidden");
