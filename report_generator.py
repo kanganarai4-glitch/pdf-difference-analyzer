@@ -532,46 +532,56 @@ class ReportGenerator :
         ws .views .sheetView [0 ].showGridLines =True 
 
         font_name ="Segoe UI"
-        title_font =Font (name =font_name ,size =14 ,bold =True ,color ="1F497D")
+        title_font =Font (name =font_name ,size =15 ,bold =True ,color ="1F1F1F")
+        timestamp_font =Font (name =font_name ,size =9 ,italic =True ,color ="555555")
         header_font =Font (name =font_name ,size =11 ,bold =True ,color ="FFFFFF")
         bold_font =Font (name =font_name ,size =10 ,bold =True )
         regular_font =Font (name =font_name ,size =10 )
         bullet_font =Font (name =font_name ,size =9.5 )
 
-        fields =[
-        "Order_ID","Order_Date","Customer_Name","City","State","Region",
+        fields =["Order_ID","Order_Date","Customer_Name","City","State","Region",
         "Country","Category","Sub_Category","Product_Name"
         ]
 
         header_fill =PatternFill (start_color ="1F497D",end_color ="1F497D",fill_type ="solid")
-        added_fill =PatternFill (start_color ="E2EFDA",end_color ="E2EFDA",fill_type ="solid")
-        deleted_fill =PatternFill (start_color ="FCE4D6",end_color ="FCE4D6",fill_type ="solid")
+        added_fill =PatternFill (start_color ="C6E0B4",end_color ="C6E0B4",fill_type ="solid")
+        deleted_fill =PatternFill (start_color ="F4CCCC",end_color ="F4CCCC",fill_type ="solid")
         modified_fill =PatternFill (start_color ="FFF2CC",end_color ="FFF2CC",fill_type ="solid")
+        band_fill_1 =PatternFill (start_color ="FFFFFF",end_color ="FFFFFF",fill_type ="solid")
+        band_fill_2 =PatternFill (start_color ="F3F3F3",end_color ="F3F3F3",fill_type ="solid")
 
         thin_border_side =Side (border_style ="thin",color ="D9D9D9")
         thin_border =Border (
         left =thin_border_side ,right =thin_border_side ,
         top =thin_border_side ,bottom =thin_border_side 
         )
+        header_border_side =Side (border_style ="thin",color ="FFFFFF")
+        header_border =Border (
+        left =header_border_side ,right =header_border_side ,
+        top =header_border_side ,bottom =header_border_side 
+        )
 
         align_left =Alignment (horizontal ="left",vertical ="top",wrap_text =False )
         align_center =Alignment (horizontal ="center",vertical ="center",wrap_text =False )
         align_wrap_top =Alignment (horizontal ="left",vertical ="top",wrap_text =True )
 
-
-        ws ["A1"]=f"Folder Difference Analysis: {analysis ['old_folder_name']} vs {analysis ['new_folder_name']}"
+        title =f"Folder Difference Analysis: {analysis ['old_folder_name']} vs {analysis ['new_folder_name']}"
+        ws ["A1"]=title
         ws ["A1"].font =title_font 
-        ws .row_dimensions [1 ].height =26 
+        ws ["A1"].alignment =Alignment (horizontal ="left",vertical ="center")
+        ws .row_dimensions [1 ].height =28 
 
         ws ["A2"]=f"Analysis Timestamp: {analysis ['timestamp']}"
-        ws ["A2"].font =regular_font 
+        ws ["A2"].font =timestamp_font 
+        ws ["A2"].alignment =Alignment (horizontal ="left",vertical ="center")
         ws .row_dimensions [2 ].height =18 
-
 
         headers =["S.No","Comparison_Status"]
         for field in fields :
             headers .extend ([f"Old_{field }",f"New_{field }"])
         headers +=["Changed_Component","Difference_Details"]
+
+        ws .merge_cells (start_row =1 ,start_column =1 ,end_row =1 ,end_column =len (headers ))
 
         DIFF_COL_IDX =headers .index ("Difference_Details")+1 
         COMP_COL_IDX =headers .index ("Changed_Component")+1 
@@ -580,20 +590,21 @@ class ReportGenerator :
             cell =ws .cell (row =4 ,column =col_idx ,value =h )
             cell .font =header_font 
             cell .fill =header_fill 
-            cell .alignment =Alignment (horizontal ="left",vertical ="center",wrap_text =False )
+            cell .alignment =Alignment (horizontal ="center",vertical ="center",wrap_text =False )
+            cell .border =header_border 
         ws .row_dimensions [4 ].height =26 
-
 
         LINE_HEIGHT_PX =14.5 
 
         for row_idx ,rec in enumerate (analysis ["results"],start =5 ):
             status =rec ["Comparison_Status"]
-            fill_style ={
+            status_fill ={
             "ADDED":added_fill ,
             "DELETED":deleted_fill ,
+            "REMOVED":deleted_fill ,
             "MODIFIED":modified_fill ,
-            }.get (status )
-
+            }.get (status ,None )
+            band_fill =band_fill_1 if (row_idx -5) %2 ==0 else band_fill_2
 
             raw_diffs =rec ["Difference_Details"]
             if isinstance (raw_diffs ,list )and raw_diffs :
@@ -603,8 +614,7 @@ class ReportGenerator :
                 bullet_text =str (raw_diffs )if raw_diffs else ""
                 num_lines =1 
 
-
-            row_height =max (20 ,num_lines *LINE_HEIGHT_PX +6 )
+            row_height =max (22 ,num_lines *LINE_HEIGHT_PX +8 )
             ws .row_dimensions [row_idx ].height =row_height 
 
             for col_idx ,field in enumerate (headers ,start =1 ):
@@ -616,34 +626,36 @@ class ReportGenerator :
                     val =rec .get (field ,"")
 
                 cell =ws .cell (row =row_idx ,column =col_idx ,value =val )
-
+                cell .border =thin_border 
+                cell .fill =band_fill
 
                 if field =="Difference_Details":
                     cell .font =bullet_font 
+                    cell .alignment =Alignment (horizontal ="left",vertical ="top",wrap_text =True)
                 elif field in ("Comparison_Status","Changed_Component"):
                     cell .font =bold_font 
+                    cell .alignment =align_center if field =="Comparison_Status" else align_wrap_top
+                elif field =="S.No":
+                    cell .alignment =Alignment (horizontal ="center",vertical ="top",wrap_text =True)
                 elif field .startswith ("Old_"):
-                    cell .font =Font (name =font_name ,size =10 ,color ="FF9C0006")
+                    cell .font =Font (name =font_name ,size =10 )
+                    cell .alignment =align_left
                 elif field .startswith ("New_"):
-                    cell .font =Font (name =font_name ,size =10 ,color ="FF006100")
+                    cell .font =Font (name =font_name ,size =10 )
+                    cell .alignment =align_left
                 else :
                     cell .font =regular_font 
+                    if field in ("Order_Date","Order_ID"):
+                        cell .alignment =align_center
+                    else :
+                        cell .alignment =align_left
 
-
+                if field =="Comparison_Status" and status_fill:
+                    cell .fill =status_fill
                 if field in ("Difference_Details","Changed_Component"):
-                    cell .alignment =align_wrap_top 
-                elif field in ("Comparison_Status","Order_Date","Order_ID"):
-                    cell .alignment =align_center 
-                else :
-                    cell .alignment =align_left 
-
-                cell .border =thin_border 
-
-                if fill_style and field in ("Comparison_Status","Difference_Details"):
-                    cell .fill =fill_style 
-                if field .startswith ("Old_")or field .startswith ("New_"):
-                    cell .alignment =align_left 
-
+                    cell .alignment =align_wrap_top
+                if field =="Difference_Details":
+                    ws .column_dimensions [get_column_letter (col_idx )].width =80
 
         for col in ws .columns :
             col_letter =get_column_letter (col [0 ].column )
@@ -661,8 +673,7 @@ class ReportGenerator :
                         max_len =max (max_len ,len (first_line ))
                 ws .column_dimensions [col_letter ].width =max (max_len +4 ,14 )
 
-
-        ws .freeze_panes ="A5"
+        ws .freeze_panes ="B5"
 
         Path (output_path ).parent .mkdir (parents =True ,exist_ok =True )
         wb .save (output_path )
